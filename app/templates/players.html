@@ -1,0 +1,9 @@
+<h1>All Players</h1>
+<ul>
+    {% for player in players %}
+        <li>
+            <a href="{{ url_for('routes.player_profile', player_id=player.id)}}">{{ player.name}}</a>
+            - {{player.position}} - {{ player.state }}
+        </li>
+    {% endfor %}
+</ul>

@@ -1,0 +1,5 @@
+# Fetch all metric leaderboards from KENPOM and merging them together into a dict, fill missing metrics will neutral or 0 values
+# Creating the algorithm for the top 40 players from the dict
+# Route Kenpompy to routes.py
+# Delete ranking_engine and sportsdata_api
+# Create frontend (FINALLY)

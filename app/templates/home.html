@@ -1,6 +1,8 @@
-{% extends "base.html" %}
-{% block content %}
-  <h2>Welcome to MyHoopWatch!</h2>
-  <div><a href="/recruits">See Recruits</a></div>
-  <div><a href="/watchlist">Watch List</a></div>
-{% endblock %}
+<h1>Top 100 Players Rankings</h1>
+<ul>
+  {% for player in players %}
+    <li>
+      {{ player.Rank}}. {{player.Player}}. {{player['KPOY Rating']}}
+    </li>
+  {% endfor %}
+</ul>
