@@ -29,4 +29,6 @@ def get_kpoy(kenpom_browser):
     top10 = kpoy_df.head(10)
     print(top10)
     return top10
-    
+
+def kenpom_90(metrics):
+    return

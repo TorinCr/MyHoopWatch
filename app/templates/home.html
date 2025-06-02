@@ -10,7 +10,7 @@
         <div class="player-card">
           <img src="https://ui-avatars.com/api/?name={{ player.Player | replace(' ', '+') }}" class="player-img" />
           <div class="player-info">
-            <h3>{{ player.Rank }}. {{ player.Player }}</h3>
+            <h3>{{ player.Rank }}. {{ player.Player }} | {{player.Height}}</h3>
             <p>{{ player.Team }} – {{ player.Year }}</p>
             <p>KenPom Rating: {{ "%.3f"|format(player["KPOY Rating"]) }}</p>
           </div>
