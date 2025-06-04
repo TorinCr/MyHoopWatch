@@ -24,11 +24,13 @@ metrics = {
 
 def get_kpoy(kenpom_browser):
     from app import kenpom_browser
+
     kpoy_data = kp.get_kpoy(kenpom_browser)
     kpoy_df = kpoy_data[0]
+
     top10 = kpoy_df.head(10)
-    print(top10)
+    
     return top10
 
-def kenpom_90(metrics):
+def kenpom_(metrics):
     return

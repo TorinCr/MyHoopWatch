@@ -3,12 +3,18 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/mainpage.css') }}">
   </head>
   <body>
-    <h1>Top 100 Players Rankings</h1>
-
+    <div class="top-page-top-20">
+      <h2 class="opener">"The KenPom 20: Elite Talent, Backed by the Metrics."</h2>
+      <img class= "top-image" src = "{{ url_for('static', filename='images/cooper_flagg.png') }}">
+    </div>
+    
     <div class="player-list">
+      <h1>Top 25 Players Rankings According to KenPom</h1>
       {% for player in players %}
         <div class="player-card">
-          <img src="https://ui-avatars.com/api/?name={{ player.Player | replace(' ', '+') }}" class="player-img" />
+          {% set pid = player.Player|lower|replace(" ", "_") ~ "_" ~ player.Team|lower|replace(" ", "_") %}
+          {% set image_url = image.get(pid, "https://ui-avatars.com/api/?name=" + player.Player | replace(' ', '+')) %}
+          <img src="{{ image_url }}" class="player-img" />
           <div class="player-info">
             <h3>{{ player.Rank }}. {{ player.Player }} | {{player.Height}}</h3>
             <p>{{ player.Team }} – {{ player.Year }}</p>

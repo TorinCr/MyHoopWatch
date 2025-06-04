@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #181818;
+    background-color: #000000;
     margin: 0;
     padding: 0;
     text-align: center;
@@ -8,13 +8,14 @@ body {
 
 h1 {
     margin-top: 30px;
+    color: white;
 }
 
 .player-list{
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
     margin-top: 20px;
 }
 
@@ -24,8 +25,9 @@ h1 {
     background: white;
     border-radius: 12px;
     width: 50%;
+    height: 500px;
     padding: 16px;
-    max-width: 600px;
+    max-width: 1000px;
     transition: transform 0.2s ease;
 }
 
@@ -36,7 +38,6 @@ h1 {
 .player-img{
     width: 120px;
     height: 120px;
-    border-radius: 50%;
     object-fit: cover;
     margin-right: 16px;
     border: 2px solid #ddd;
@@ -55,4 +56,14 @@ h1 {
     margin: 4px 0;
     font-size: 14px;
     color: #333;
+}
+
+.top-image{
+    display: block;
+    width: 1200px;
+    height: 750px;
+    margin-left: 50%;
+}
+.opener{
+    color: white;
 }
