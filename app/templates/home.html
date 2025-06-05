@@ -5,21 +5,41 @@
   <body>
     <div class="top-page-top-20">
       <h2 class="opener">"The KenPom 20: Elite Talent, Backed by the Metrics."</h2>
-      <img class= "top-image" src = "{{ url_for('static', filename='images/cooper_flagg.png') }}">
+      <img class="top-image" src="{{ url_for('static', filename='images/cooper_flagg.png') }}">
     </div>
-    
+
     <div class="player-list">
       <h1>Top 25 Players Rankings According to KenPom</h1>
+
       {% for player in players %}
+        {% set team_id = player.Team|lower|replace(" ", "_") %}
+        {% set pid = player.Player|lower|replace(" ", "_") ~ "_" ~ player.Team|lower|replace(" ", "_") %}
+        {% set image_url = image.get(pid, "https://ui-avatars.com/api/?name=" + player.Player | replace(' ', '+')) %}
+
         <div class="player-card">
-          {% set pid = player.Player|lower|replace(" ", "_") ~ "_" ~ player.Team|lower|replace(" ", "_") %}
-          {% set image_url = image.get(pid, "https://ui-avatars.com/api/?name=" + player.Player | replace(' ', '+')) %}
-          <img src="{{ image_url }}" class="player-img" />
-          <div class="player-info">
-            <h3>{{ player.Rank }}. {{ player.Player }} | {{player.Height}}</h3>
-            <p>{{ player.Team }} – {{ player.Year }}</p>
-            <p>KenPom Rating: {{ "%.3f"|format(player["KPOY Rating"]) }}</p>
+          
+          <!-- Header Section: Rank, Name, Team, Logo -->
+          <div class="player-header">
+            <span class="player-rank">{{ player.Rank }}</span>
+            <div class="player-meta">
+              <h2>{{ player.Player }}</h2>
+              <p>{{ player.Team }}</p>
+            </div>
+            <img src="{{ team_logo.get(team_id) }}" alt="{{ player.Team }} Logo" class="team-logo"/>
           </div>
+
+          <!-- Body Section: Image + Stats -->
+          <div class="player-body">
+            <div class="player-left">
+              <img src="{{ image_url }}" alt="{{ player.Player }}" class="player-img"/>
+              <div class="player-info-box">
+                <p>Height: {{ player.Height }} · Weight: {{ player.Weight }} lbs</p>
+                <p>Class: {{ player.Year }} · KenPom Rating: {{ "%.3f"|format(player["KPOY Rating"]) }}</p>
+              </div>
+            </div>
+
+          </div>
+
         </div>
       {% endfor %}
     </div>
