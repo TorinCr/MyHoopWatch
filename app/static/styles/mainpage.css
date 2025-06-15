@@ -116,28 +116,42 @@ h2 {
     height: 150px;
     object-fit: cover;
     border: 2px solid #ddd;
-    padding-left: 200px;
+    padding-left: 45px;
 }
 
 .player-left{
-    display: flex;
     flex-direction: column;
     align-items: center;
-    width: 160px;
+    width: 60px;
     padding-top: 10px;
 }
 
 .player-info-box {
     background-color: #f5f5f5;
+    position: relative;
     border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-top: 8px;
+    bottom: 10px;
+    width: 299px;
+    margin-top: 10px;
     box-sizing: border-box;
     text-align: center;
 }
 
 .player-info-box p {
+    font-family: "Lucida Console", "Courier New", monospace;
     color: #666;
     font-size: 15px;
     margin: 4px 0;
+}
+
+.player-right{
+  align-items: center;
+}
+
+.player-description{
+  color: black;
+  position: relative;
+  width: 510px;
+  left: 270px;
+  text-align: center;
 }

@@ -36,6 +36,17 @@ problematic_stats = {
 
 stat_leaders = {}
 
+def get_player_descriptions():
+
+    player_descriptions = {
+    "cooper_flagg_duke_": "The consensus #1 NBA Draft pick who delivered the most dominant freshman season in recent memory. Flagg averaged 19.2 points, 7.5 rebounds, and 4.2 assists while shooting 48.1% from the field and 38.5% from three. His 42-point explosion against Notre Dame set new freshman scoring records for both Duke and the ACC, showcasing elite versatility as a 6'9\" forward who can handle, shoot, and defend multiple positions.",
+    "johni_broome_auburn": "Different unique description...",
+    "mark_sears_alabama": "Another unique description...",
+    }
+    
+    return player_descriptions
+    
+
 def handle_problematic_stat_scraping(browser, metric):
     """Handle stats that need web scraping"""
     print(f"Starting web scraping for {metric}...")
@@ -175,13 +186,17 @@ def handle_problematic_stat_scraping(browser, metric):
         df = pd.DataFrame(rows, columns=headers)
         print(f"Created DataFrame for {metric}: {df.shape}")
         print(f"Final columns: {df.columns.tolist()}")
-        
-        # Show a sample of the data
-        if len(df) > 0:
-            print("Sample data:")
-            print(df.head(2))
-        
-        return [df]  # Return as list to match kenpompy format
+
+        df = df[df['Player']!= 'Player']
+
+        df = df.reset_index(drop=True)
+
+        numeric_columns = ['Rk', '3PM', '3PA', '3P%', 'Ht', 'Wt']
+
+        for col in numeric_columns:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce")
+        df = df.dropna(subset=['Player'])
         
     except Exception as e:
         print(f"Scraping error for {metric}: {e}")
@@ -294,7 +309,7 @@ def get_playerstats_fixed(browser, season, metric):
                     
                 df = pd.DataFrame(data, columns=headers)
                 print(f"Created DataFrame: {df.shape}")
-                print(f"Sample data: {df.head(2)}")
+                print(f"Sample data: {df.head(100)}")
                 
                 return [df]
                 
@@ -324,8 +339,9 @@ def get_kpoy(kenpom_browser):
 def top_leaderboards(stat):
     return stat_leaders.get(stat)
 
-def kenpom_ratings():
+def get_kenpom_data():
     combined_df = None
+    print(f"Starting extraction. stat_leaders currently has: {len(stat_leaders)} items")
 
     # Process all stats (including the problematic ones)
     all_metrics = {**metrics, **problematic_stats}
@@ -433,7 +449,7 @@ def kenpom_ratings():
     print("Available stat keys:", list(stat_leaders.keys()))
     if combined_df is not None:
         print("Combined Data Preview:")
-        print(combined_df.head())
+        combined_df.to_csv('full_data.csv', index=False)
         print(f"Combined DataFrame shape: {combined_df.shape}")
         
         # Show columns with actual data
@@ -444,24 +460,321 @@ def kenpom_ratings():
             
     else:
         print("No combined data created")
+    
+    print(f"\n=== FINAL STAT_LEADERS STATUS ===")
+    print(f"stat_leaders has {len(stat_leaders)} items: {list(stat_leaders.keys())}")
 
     return combined_df
 
-def get_stat_leaders(stat_key, n=10):
-    """Get top N players for a specific stat"""
-    if stat_key not in stat_leaders:
-        print(f"Stat {stat_key} not available. Available stats: {list(stat_leaders.keys())}")
-        return None
-    
-    df = stat_leaders[stat_key]
-    # Sort by rank if available, otherwise by the stat value
-    if 'Rank' in df.columns:
-        return df.head(n)
-    elif stat_key in df.columns:
-        return df.sort_values(stat_key, ascending=False).head(n)
-    else:
-        return df.head(n)
+def get_players_with_multiple_stats(min_stats=2):
+    player_stats_db = {}
 
-# Run the main function
+    for stat_name, df in stat_leaders.items():
+        if df is not None:
+            print(f"Processing {stat_name}...")
+        
+        for index, row in df.iterrows():
+            player_id = f"{row['Player']}_{row['Team']}"
+
+            if player_id not in player_stats_db:
+                player_stats_db[player_id] = {
+                    'Player': row['Player'],
+                    'Team': row['Team'],
+                    'stat_count': 0
+                }
+
+            player_stats_db[player_id][stat_name] = row[stat_name] 
+            player_stats_db[player_id]['stat_count'] += 1
+
+    qualified_players = {}
+    for player_id, player_data in player_stats_db.items():
+        if player_data['stat_count'] >= min_stats:
+            qualified_players[player_id] = player_data
+
+    print(f"Found {len(qualified_players)} players with {min_stats}+ stats")
+    return qualified_players
+
+def statistical_excellence():
+    """
+    KenPom-Style Statistical Excellence Rating System
+    
+    Analyzes players who appear in KenPom's top-100 statistical categories
+    and creates composite ratings based on multi-dimensional performance.
+    
+    SCOPE: Elite statistical performers, not necessarily overall best players
+    """
+
+    print("KENPOM-STYLE STATISTICAL EXCELLENCE RATING SYSTEM")
+    print("=" * 80)
+    print("WHAT THIS SYSTEM MEASURES:")
+    print("   - Players excelling in multiple KenPom statistical categories")
+    print("   - Multi-dimensional efficiency across offensive metrics")
+    print("   - Composite ratings using KenPom's analytical philosophy")
+    print("")
+    print("IMPORTANT LIMITATIONS:")
+    print("   • Only includes players appearing in top-100 statistical leaderboards")
+    print("   • May not include all top overall players (e.g., well-rounded players")
+    print("     who don't crack top-100 in individual categories)")
+    print("   • Focuses on statistical excellence, not overall player rankings")
+    print("=" * 80)
+
+    # Enhanced stat weights based on KenPom philosophy
+    stat_weights = {
+        'ortg': 40,     # Overall offensive rating - most important if available
+        'efg': 35,      # Effective FG% - shooting efficiency is crucial
+        'ts': 30,       # True shooting % - another shooting metric
+        'to': -30,      # Turnover rate - lower is better (negative weight)
+        'arate': 25,    # Assist rate - playmaking ability
+        'or': 20,       # Offensive rebounding - extra possessions
+        'ftrate': 15,   # Free throw rate - getting to the line
+    }
+
+    print("\nSTATISTICAL CATEGORIES & WEIGHTS:")
+    print("   (Higher weights = more important to overall rating)")
+    print("-" * 60)
+
+    for stat, weight in stat_weights.items():
+        if weight > 0:
+            direction = "Higher is better"
+            impact = "High" if weight >= 30 else "Medium" if weight >= 20 else "Low"
+        else:
+            direction = "Lower is better"
+            impact = "High"
+
+        full_name = {
+            'ortg': 'Offensive Rating',
+            'efg': 'Effective Field Goal %',
+            'ts': 'True Shooting %',
+            'to': 'Turnover Rate',
+            'arate': 'Assist Rate', 
+            'or': 'Offensive Rebounding %',
+            'ftrate': 'Free Throw Rate'
+        }[stat]
+        
+        print(f"   {stat.upper():<8} {full_name:<25} Weight: {abs(weight):2d} ({impact:<6} impact) {direction}")
+
+    stat_percentiles = {}
+    stat_ranges = {}
+    available_stats = []
+
+    print(f"\nAVAILABLE DATA SUMMARY:")
+    print("-" * 50)
+
+    for stat_name, df in stat_leaders.items():
+        if df is not None and stat_name in stat_weights:
+            values = [float(x) for x in df[stat_name].tolist()]
+
+            if stat_name == 'to':
+                values.sort()
+            else:
+                values.sort(reverse=True)
+
+            stat_percentiles[stat_name] = values
+            stat_ranges[stat_name] = (min(values), max(values))
+            available_stats.append(stat_name)
+
+            print(f"{stat_name.upper():<8} {len(values):3d} players     Range:{min(values):5.1f} to {max(values):5.1f}")
+    
+    total_unique_players = len(set().union(*[
+        set(df['Player'] + '_' + df['Team']) for stat, df in stat_leaders.items() 
+        if df is not None and stat in stat_weights
+    ]))
+    
+    print(f"\n   Total unique players across all categories: {total_unique_players}")
+    print(f"   Available statistical categories: {len(available_stats)}")
+
+    # Calculate composite scores
+    player_scores = {}
+
+    for stat_name, df in stat_leaders.items():
+        if df is not None and stat_name in stat_weights:
+            for _, row in df.iterrows():
+                player_id = f"{row['Player']}_{row['Team']}"
+
+                if player_id not in player_scores:
+                    player_scores[player_id] = {
+                        'Player': row['Player'],
+                        'Team': row['Team'],
+                        'composite_score': 0,
+                        'stats_used': [],
+                        'stat_details': {},
+                        'tier': 'Unknown'
+                    }
+
+                #Calculating Percentile
+                stat_value = float(row[stat_name])
+                stat_list = stat_percentiles[stat_name]
+
+                try:
+                    if stat_name == 'to': # The lower the better for turnovers
+                        percentile = (stat_list.index(stat_value) / len(stat_list)) * 100
+                    else:
+                        percentile = 100 - (stat_list.index(stat_value)/ len(stat_list)) * 100
+                except ValueError:
+                    closest_idx = min(range(len(stat_list)), key=lambda i: abs(stat_list[i] - stat_value))
+                    if stat_name == 'to':
+                        percentile = (closest_idx/len(stat_list)) * 100
+                    else:
+                        percentile = 100 - (closest_idx/len(stat_list)) * 100
+
+
+                weighted_score = percentile * (abs(stat_weights[stat_name]) / 100)
+                if stat_weights[stat_name] < 0:
+                    weighted_score *= -1
+                
+                player_scores[player_id]['composite_score'] += weighted_score
+                player_scores[player_id]['stats_used'].append(stat_name)
+                player_scores[player_id]['stat_details'][stat_name] = {
+                    'value': stat_value,
+                    'percentile': percentile,
+                    'weighted_score': weighted_score
+                }
+
+    print("=== DEBUGGING final_ratings creation ===")
+    print(f"Available stat categories: {list(stat_leaders.keys())}")
+    print(f"Player scores calculated: {len(player_scores)}")
+
+    final_ratings = []
+    print(f"final_ratings initialized: {len(final_ratings)}")
+
+    # Your existing logic (which is correct):
+    for player_id, data in player_scores.items():
+        if len(data['stats_used']) >= 2:
+            score = data['composite_score']
+            stat_count = len(data['stats_used'])
+
+            if score >= 60:
+                data['tier'] = 'Elite Multi-Category Leader'
+            elif score >= 40:
+                data['tier'] = 'Excellent Multi-Category Performer'
+            elif score >= 20:
+                data['tier'] = 'Very Good Statistical Producer'
+            elif score >= 10:
+                data['tier'] = 'Above Average'
+
+            if stat_count >= 4:
+                data['diversity'] = 'Highly Diverse'
+            elif stat_count >= 3:
+                data['diversity'] = 'Multi-Dimensional'
+            else:
+                data['diversity'] = 'Specialist'
+
+            final_ratings.append(data)
+
+    print(f"final_ratings after processing: {len(final_ratings)} players")
+    
+    final_ratings.sort(key=lambda x: x['composite_score'], reverse=True)
+
+    print(f"\nTOP 25 STATISTICAL EXCELLENCE LEADERS")
+    print(" (Ranked by composite performance across multiple KenPom categories)")
+    print("=" * 100)
+    print(f"{'Rank':<4} {'Player':<25} {'Team':<18} {'Score':<8} {'Profile':<15} {'Key Strengths'}")
+    print("-" * 110)
+
+    for i, player in enumerate(final_ratings[:200]):
+        rank = i + 1
+        name = player['Player']
+        team = player['Team']
+        score = player['composite_score']
+        diversity = player['diversity']
+        stats_count = len(player['stats_used'])
+
+        print(f"{rank:<4} {name:<25} {team:<18} {score:<6.1f} {diversity:<15}")
+
+        sorted_stats = sorted(player['stat_details'].items(),
+                              key=lambda x: abs(x[1]['weighted_score']), reverse=True)
+        stat_summary = []
+
+        for stat_name, info in sorted_stats[:3]:
+            if info['percentile'] >= 95:
+                emoji = "[ELITE]"
+            elif info['percentile'] >= 85:
+                emoji = "[EXCEL]"
+            elif info['percentile'] >= 70:
+                emoji = "[GOOD]"
+            else:
+                emoji = "[AVG]"
+            stat_summary.append(f"{emoji}{stat_name.upper()}:{info['value']:.1f}")
+
+        print(f"({stats_count} cats) {' '.join(stat_summary)}")
+
+    print(f"\nCATEGORY LEADERS & INSIGHTS")
+    print("=" * 60)
+
+    categories = {
+        'ortg': 'Highest Offensive Rating',
+        'efg': 'Most Efficient Shooter (eFG%)',
+        'ts': 'Best True Shooting %',
+        'to': 'Best Ball Security (Lowest TO%)',
+        'arate': 'Best Playmaker (Assist Rate)',
+        'or': 'Best Offensive Rebounder'
+    }
+
+    for stat, description in categories.items():
+        if stat in stat_percentiles and stat_percentiles[stat]:
+            best_value = stat_percentiles[stat][0]
+            
+            # Find player with this value
+            for player in final_ratings:
+                if stat in player['stat_details']:
+                    if abs(player['stat_details'][stat]['value'] - best_value) < 0.1:
+                        print(f"{description}:")
+                        print(f"   {player['Player']} ({player['Team']}) - {best_value:.1f}")
+                        print(f"   Overall Rating Rank: #{final_ratings.index(player) + 1}")
+                        break
+            print()
+
+    # Summary and Insights
+    print(f"RATING SYSTEM SUMMARY")
+    print("-" * 40)
+    qualified_players = len(final_ratings) + 1
+    avg_score = sum(p['composite_score'] for p in final_ratings) / qualified_players
+    
+    tier_counts = {}
+    diversity_counts = {}
+    for player in final_ratings:
+        tier = player['tier']
+        diversity = player['diversity']
+        tier_counts[tier] = tier_counts.get(tier, 0) + 1
+        diversity_counts[diversity] = diversity_counts.get(diversity, 0) + 1
+    
+    print(f"Players meeting criteria (2+ categories): {qualified_players}")
+    print(f"Average composite score: {avg_score:.1f}")
+    if len(final_ratings) > 0:
+        print(f"Score range: {final_ratings[-1]['composite_score']:.1f} to {final_ratings[0]['composite_score']:.1f}")
+    else:
+        print("No players qualified for final ratings")
+    
+    print(f"\nPlayer Diversity Profiles:")
+    for diversity, count in sorted(diversity_counts.items(), reverse=True):
+        percentage = (count / qualified_players) * 100
+        print(f"   {diversity:<20} {count:3d} players ({percentage:4.1f}%)")
+    
+    print(f"\nWHAT THESE RANKINGS TELL US:")
+    print("   • Top players excel in multiple statistical categories")
+    print("   • Elite performers combine efficiency with production")  
+    print("   • Multi-dimensional players score higher than one-category specialists")
+    print("   • Rankings reflect KenPom's emphasis on efficiency metrics")
+    
+    print(f"\nFOR FURTHER ANALYSIS:")
+    print("   • Compare these statistical leaders with team performance")
+    print("   • Look for players strong in complementary categories")
+    print("   • Consider context of competition level and team system")
+    print("   • Use as starting point for deeper player evaluation")
+    
+    return final_ratings
+
 if __name__ == "__main__":
-    result = kenpom_ratings()
+    # Load KenPom data
+    print("Loading KenPom statistical data...")
+    result = get_kenpom_data()
+    
+    # Run statistical excellence rating system
+    print("\nRunning Statistical Excellence Analysis...")
+    kenpom_ratings = statistical_excellence()
+    
+    # Optional: Show players with multiple stats
+    print("\nFinding multi-dimensional players...")
+    multi_stat_players = get_players_with_multiple_stats(min_stats=3)
+    
+    print(f"\nAnalysis complete! Found {len(kenpom_ratings)} rated players.")
