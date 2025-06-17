@@ -1,6 +1,13 @@
 /* Reset + Base */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  font-family: 'Inter', sans-serif;
+  font-feature-settings: 'liga' 1, 'calt' 1; /* optional font features */
+}
+
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /*font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
   background-color: #000;
   margin: 0;
   padding: 0;
@@ -134,14 +141,14 @@ h2 {
     width: 299px;
     margin-top: 10px;
     box-sizing: border-box;
-    text-align: center;
+    text-align: left;
 }
 
 .player-info-box p {
-    font-family: "Lucida Console", "Courier New", monospace;
     color: #666;
     font-size: 15px;
     margin: 4px 0;
+    padding-left: 30px;
 }
 
 .player-right{
@@ -153,5 +160,5 @@ h2 {
   position: relative;
   width: 510px;
   left: 270px;
-  text-align: center;
+  text-align: left;
 }

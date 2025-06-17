@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teams</title>
+</head>
+<body>
+    <h1>College Basketball Teams</h1>
+    
+    {% if teams %}
+        <div class="teams-list">
+            {% for team in teams %}
+                <div class="team-card">
+                    <h3>{{ team.school }}</h3>
+                    <p>Conference: {{ team.conference }}</p>
+                    <!-- Add more team data as needed -->
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No teams found.</p>
+    {% endif %}
+</body>
+</html>
